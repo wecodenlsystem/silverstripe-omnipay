@@ -46,6 +46,23 @@ class GatewayResponse{
 	}
 
 	/**
+	 * Returns true if the payment status is one of the following:
+	 * - cancelled
+	 * - declined
+	 * - expired
+	 * @return bool
+	 */
+	public function isCancelled()
+	{
+		$isCancelled = false;
+		if ($this->response && method_exists($this->response, 'getPaymentStatus')) {
+			$cancelledStatuses = array('canceled', 'declined', 'expired');
+			$isCancelled = in_array($this->response->getPaymentStatus(), $cancelledStatuses);
+		}
+		return $isCancelled;
+	}
+
+	/**
 	 * Check if a redirect to an offsite gateway is required.
 	 * Note that {@link redirect()} will still cause a redirect for onsite gateways,
 	 * but in this case uses the provided {@link redirect} URL rather than asking the gateway

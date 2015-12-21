@@ -55,10 +55,11 @@ class PaymentGatewayController extends Controller{
 		$response = null;
 		switch ($this->request->param('Status')) {
 			case "complete":
+				/** @var GatewayResponse $serviceResponse */
 				$serviceResponse = $service->completePurchase();
 				// instead of checking for a completed payment,
 				// make sure the payment was not cancelled
-				if (!$this->isPaymentCancelled($serviceResponse)){
+				if (!$serviceResponse->isCancelled()) {
 					$response = $this->redirect($this->getSuccessUrl($message));
 				} else {
 					$response = $this->redirect($this->getFailureUrl($message));
@@ -108,19 +109,5 @@ class PaymentGatewayController extends Controller{
 	 */
 	private function getFailureUrl($message) {
 		return $message->FailureURL ? $message->FailureURL : Director::baseURL();
-	}
-
-	/**
-	 * Returns true if the payment status is one of the following:
-	 * - cancelled
-	 * - declined
-	 * - expired
-	 * @param GatewayResponse $gatewayResponse
-	 * @return bool
-	 */
-	private function isPaymentCancelled($gatewayResponse)
-	{
-		/** @noinspection PhpUndefinedMethodInspection */
-		return $gatewayResponse->isCanceled() || $gatewayResponse->isExpired() || $gatewayResponse->isRejected();
 	}
 }
